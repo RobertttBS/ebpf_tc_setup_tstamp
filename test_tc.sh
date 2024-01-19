@@ -50,16 +50,34 @@ ip netns exec ns2 ip -6 route add ::/0 dev veth1
 ip -6 route
 
 
-# echo "====Setup TC===="
-# tc qdisc replace dev veth0 root etf clockid CLOCK_TAI skip_sock_check deadline_mode
-# ip netns exec ns2 tc qdisc replace dev veth1 root etf clockid CLOCK_TAI skip_sock_check deadline_mode
-# tc qdisc show dev veth0
-# ip netns exec ns2 tc qdisc show dev veth1
+echo "====Setup TC===="
+${EXEC_NS2} tc qdisc add dev veth0 root handle 1: skbprio
 
 # Test connectivity between the two IP addresses
+# ping -c 3 -I 192.168.1.1 192.168.1.2
+# ip netns exec ns2 ping -c 3 192.168.1.1
+
+# ${EXEC_NS2} tc -s filter show dev veth0
+# ${EXEC_NS2} tc -s class show dev veth0
+
+
+echo "====Compile===="
+clang -O2 -target bpf -c tc-xdp-drop-tcp.c -o tc-xdp-drop-tcp.o
+
+echo "====Load ebpf program===="
+tc qdisc add dev veth0 clsact
+tc filter add dev veth0 egress bpf da obj tc-xdp-drop-tcp.o sec tc
+
+echo "====Load fq qdisc===="
+tc qdisc replace dev veth0 root fq
+
+echo "====Ping test===="
 ping -c 3 -I 192.168.1.1 192.168.1.2
 ip netns exec ns2 ping -c 3 192.168.1.1
 
+
+
 # Remove the veth interfaces and network namespace
-# ip link delete veth0
-# ip netns delete ns2
+echo "====Clean env===="
+ip link delete veth0
+ip netns delete ns2
