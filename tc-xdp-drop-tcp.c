@@ -10,7 +10,7 @@
 SEC("tc")
 int tc_drop_tcp(struct __sk_buff *skb)
 {
-    skb->tstamp = bpf_ktime_get_ns() + skb->priority + 1000; // priority is in microseconds
+    skb->tstamp = bpf_ktime_get_tai_ns() + (skb->priority << 10) + 100000000; // priority is in microseconds
 
     return TC_ACT_OK;
 }
