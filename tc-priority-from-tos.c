@@ -16,7 +16,7 @@ struct eth_hdr {
 };
 
 SEC("tc")
-int tc_drop_tcp(struct __sk_buff *skb)
+int tc_priority_from_tos(struct __sk_buff *skb)
 {
     void *data = (void *) (long) skb->data;
     void *data_end = (void *) (long) skb->data_end;

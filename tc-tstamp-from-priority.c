@@ -16,7 +16,7 @@ struct eth_hdr {
 };
 
 SEC("tc")
-int tc_drop_tcp(struct __sk_buff *skb)
+int tc_setup_tstamp(struct __sk_buff *skb)
 {
     skb->tstamp = bpf_ktime_get_ns() + skb->priority * 1000000;
 

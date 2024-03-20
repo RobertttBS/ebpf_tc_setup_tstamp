@@ -2,7 +2,7 @@
 
 
 echo "====Compile===="
-clang -O2 -target bpf -c tc-xdp-drop-tcp.c -o tc-xdp-drop-tcp.o
+clang -O2 -target bpf -c tc-setup-tstamp.bpf.c -o tc-setup-tstamp.bpf.o
 
 # echo "====Load eBPF program to veth0===="
 # tc qdisc add dev veth0 clsact
@@ -15,7 +15,7 @@ clang -O2 -target bpf -c tc-xdp-drop-tcp.c -o tc-xdp-drop-tcp.o
 
 echo "====Load eBPF program to test===="
 tc qdisc replace dev enp5s0f1 clsact
-tc filter add dev enp5s0f1 egress bpf da obj tc-xdp-drop-tcp.o sec tc
+tc filter add dev enp5s0f1 egress bpf da obj tc-setup-tstamp.bpf.o sec tc
 tc qdisc add dev enp5s0f1 root etf clockid CLOCK_TAI skip_sock_check deadline_mode
 
 
