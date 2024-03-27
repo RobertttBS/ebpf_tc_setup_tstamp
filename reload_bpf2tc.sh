@@ -1,6 +1,10 @@
 #!/bin/bash
 
 
+tc qdisc del dev enp5s0f1 root etf
+# tc qdisc del dev enp5s0f1 root skbprio
+tc qdisc del dev enp5s0f1 clsact
+
 echo "====Compile===="
 clang -O2 -target bpf -c tc-setup-tstamp.bpf.c -o tc-setup-tstamp.bpf.o
 
@@ -16,8 +20,12 @@ clang -O2 -target bpf -c tc-setup-tstamp.bpf.c -o tc-setup-tstamp.bpf.o
 echo "====Load eBPF program to test===="
 tc qdisc replace dev enp5s0f1 clsact
 tc filter add dev enp5s0f1 egress bpf da obj tc-setup-tstamp.bpf.o sec tc
-# tc qdisc add dev enp5s0f1 root etf clockid CLOCK_TAI skip_sock_check deadline_mode # with deadline mode
-tc qdisc add dev enp5s0f1 root etf clockid CLOCK_TAI skip_sock_check delta 60000
+tc qdisc add dev enp5s0f1 root etf clockid CLOCK_TAI skip_sock_check deadline_mode # with deadline mode
+# tc qdisc add dev enp5s0f1 root etf clockid CLOCK_TAI skip_sock_check delta 60000
+
+# tc qdisc add dev enp5s0f1 root handle 1: skbprio
+
+tc qdisc show dev enp5s0f1
 
 
 # echo "====Load ETF qdisc===="
